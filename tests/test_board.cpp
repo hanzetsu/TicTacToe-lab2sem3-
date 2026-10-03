@@ -1,10 +1,5 @@
 #include <gtest/gtest.h>
 #include "core/Board.hpp"
-#include "core/Exceptions.hpp"
-
-// ============================================================
-//  Конструктор и пустое поле
-// ============================================================
 
 TEST(BoardConstructor, NewBoardIsEmpty) {
     Board b;
@@ -23,41 +18,33 @@ TEST(BoardConstructor, EmptyBoardIsNotGameOver) {
 
 TEST(BoardConstructor, XMovesFirst) {
     Board b;
-    EXPECT_EQ(b.whoseMove(), 1);   // 1 = крестики
+    EXPECT_EQ(b.whoseMove(), 1);
     EXPECT_EQ(b.countMoves(), 0);
 }
 
-// ============================================================
-//  whoseMove — чередование игроков
-// ============================================================
-
 TEST(BoardWhoseMove, AlternatesBetweenPlayers) {
     Board b;
-    EXPECT_EQ(b.whoseMove(), 1);   // X
+    EXPECT_EQ(b.whoseMove(), 1);
     b.makeMove(0, 0);
-    EXPECT_EQ(b.whoseMove(), 2);   // O
+    EXPECT_EQ(b.whoseMove(), 2);
     b.makeMove(1, 0);
-    EXPECT_EQ(b.whoseMove(), 1);   // X
+    EXPECT_EQ(b.whoseMove(), 1);
     b.makeMove(0, 1);
-    EXPECT_EQ(b.whoseMove(), 2);   // O
+    EXPECT_EQ(b.whoseMove(), 2);
 }
-
-// ============================================================
-//  makeMove / undoMove
-// ============================================================
 
 TEST(BoardMakeMove, PlacesCorrectSymbol) {
     Board b;
     EXPECT_TRUE(b.makeMove(0, 0));
-    EXPECT_EQ(b.getCell(0, 0), 1);   // X
+    EXPECT_EQ(b.getCell(0, 0), 1);
     EXPECT_TRUE(b.makeMove(1, 1));
-    EXPECT_EQ(b.getCell(1, 1), 2);   // O
+    EXPECT_EQ(b.getCell(1, 1), 2);
 }
 
 TEST(BoardMakeMove, ReturnsFalseOnTakenCell) {
     Board b;
     EXPECT_TRUE(b.makeMove(0, 0));
-    EXPECT_FALSE(b.makeMove(0, 0));   // занято
+    EXPECT_FALSE(b.makeMove(0, 0));
     EXPECT_EQ(b.countMoves(), 1);
 }
 
@@ -67,7 +54,7 @@ TEST(BoardUndo, RestoresEmptyCell) {
     EXPECT_TRUE(b.undoMove(1, 1));
     EXPECT_EQ(b.getCell(1, 1), 0);
     EXPECT_EQ(b.countMoves(), 0);
-    EXPECT_EQ(b.whoseMove(), 1);   // снова X
+    EXPECT_EQ(b.whoseMove(), 1);
 }
 
 TEST(BoardUndo, ReturnsFalseOnEmptyCell) {
@@ -77,9 +64,9 @@ TEST(BoardUndo, ReturnsFalseOnEmptyCell) {
 
 TEST(BoardUndo, SequenceOfMovesAndUndos) {
     Board b;
-    b.makeMove(0, 0);   // X
-    b.makeMove(1, 1);   // O
-    b.makeMove(2, 2);   // X
+    b.makeMove(0, 0);
+    b.makeMove(1, 1);
+    b.makeMove(2, 2);
     EXPECT_EQ(b.countMoves(), 3);
 
     b.undoMove(2, 2);
@@ -90,20 +77,12 @@ TEST(BoardUndo, SequenceOfMovesAndUndos) {
     EXPECT_EQ(b.getCell(2, 2), 0);
 }
 
-// ============================================================
-//  isCellTaken
-// ============================================================
-
 TEST(BoardCellTaken, EmptyVsTaken) {
     Board b;
     EXPECT_FALSE(b.isCellTaken(0, 0));
     b.makeMove(0, 0);
     EXPECT_TRUE(b.isCellTaken(0, 0));
 }
-
-// ============================================================
-//  isWin — все 8 линий (для X)
-// ============================================================
 
 TEST(BoardWin, TopRow) {
     Board b;
@@ -172,31 +151,27 @@ TEST(BoardWin, AntiDiagonal) {
 
 TEST(BoardWin, OCanWinToo) {
     Board b;
-    b.makeMove(0,0);   // X
-    b.makeMove(1,0);   // O
-    b.makeMove(0,1);   // X
-    b.makeMove(1,1);   // O
-    b.makeMove(2,2);   // X
-    b.makeMove(1,2);   // O — победа
+    b.makeMove(0,0);
+    b.makeMove(1,0);
+    b.makeMove(0,1);
+    b.makeMove(1,1);
+    b.makeMove(2,2);
+    b.makeMove(1,2);
     EXPECT_TRUE(b.isWin(2));
     EXPECT_FALSE(b.isWin(1));
 }
 
-// ============================================================
-//  isDraw
-// ============================================================
-
 TEST(BoardDraw, FullBoardWithoutWinnerIsDraw) {
     Board b;
-    b.makeMove(0,0);   // X
-    b.makeMove(0,1);   // O
-    b.makeMove(0,2);   // X
-    b.makeMove(1,1);   // O
-    b.makeMove(1,0);   // X
-    b.makeMove(1,2);   // O
-    b.makeMove(2,1);   // X
-    b.makeMove(2,0);   // O
-    b.makeMove(2,2);   // X
+    b.makeMove(0,0);
+    b.makeMove(0,1);
+    b.makeMove(0,2);
+    b.makeMove(1,1);
+    b.makeMove(1,0);
+    b.makeMove(1,2);
+    b.makeMove(2,1);
+    b.makeMove(2,0);
+    b.makeMove(2,2);
 
     EXPECT_FALSE(b.isWin(1));
     EXPECT_FALSE(b.isWin(2));
@@ -206,24 +181,20 @@ TEST(BoardDraw, FullBoardWithoutWinnerIsDraw) {
 
 TEST(BoardDraw, WinOnLastMoveIsNotDraw) {
     Board b;
-    b.makeMove(0,0);   // X
-    b.makeMove(1,0);   // O
-    b.makeMove(0,1);   // X
-    b.makeMove(1,1);   // O
-    b.makeMove(0,2);   // X
-    b.makeMove(2,0);   // O
-    b.makeMove(1,2);   // X
-    b.makeMove(2,2);   // O
-    b.makeMove(2,1);   // X — последний ход
+    b.makeMove(0,0);
+    b.makeMove(1,0);
+    b.makeMove(0,1);
+    b.makeMove(1,1);
+    b.makeMove(0,2);
+    b.makeMove(2,0);
+    b.makeMove(1,2);
+    b.makeMove(2,2);
+    b.makeMove(2,1);
 
     EXPECT_TRUE(b.isWin(1));
-    EXPECT_FALSE(b.isDraw());     // ← ловит баг с isDraw
+    EXPECT_FALSE(b.isDraw());
     EXPECT_TRUE(b.isGameOver());
 }
-
-// ============================================================
-//  Исключения (CheckIndex)
-// ============================================================
 
 TEST(BoardExceptions, NegativeIndexThrows) {
     Board b;
@@ -237,4 +208,10 @@ TEST(BoardExceptions, LargeIndexThrows) {
     EXPECT_THROW(b.getCell(3, 0), IndexOutOfRange);
     EXPECT_THROW(b.getCell(0, 3), IndexOutOfRange);
     EXPECT_THROW(b.makeMove(3, 3), IndexOutOfRange);
+}
+
+TEST(BoardEmptyCells, EmptyBoardHas9Cells) {
+    Board b;
+    auto cells = b.getEmptyCells();
+    EXPECT_EQ(cells.GetLength(), 9);
 }

@@ -1,14 +1,13 @@
 #include "Board.hpp"
-
 void Board::CheckIndex(int r, int c) const
 {
     if (r >= SIZE_OF_BOARD || r < 0)
     {
-        throw IndexOutOfRange(r, SIZE_OF_BOARD, "Вы вышли за границы поля SIZE_OF_BOARDxSIZE_OF_BOARD");
+        throw IndexOutOfRange(r, SIZE_OF_BOARD, "Вы вышли за границы поля");
     }
     if (c >= SIZE_OF_BOARD || c < 0)
     {
-        throw IndexOutOfRange(c, SIZE_OF_BOARD, "Вы вышли за границы поля SIZE_OF_BOARDxSIZE_OF_BOARD");
+        throw IndexOutOfRange(c, SIZE_OF_BOARD, "Вы вышли за границы поля");
     }
 }
 bool Board::isCellTaken(int r, int c) const
@@ -122,4 +121,23 @@ void Board::print() const
         }
         std::cout << std::endl;
     }
+}
+
+MutableArraySequence<int> Board::getEmptyCells() const {
+    MutableArraySequence<int>  result;
+    for (int i = 0; i < SIZE_OF_BOARD; i++) {
+        for (int j = 0; j < SIZE_OF_BOARD; j++) {
+            if(!isCellTaken(i,j)) {
+                result.Append(i * SIZE_OF_BOARD + j);
+            }
+        }
+    }
+    return result;
+}
+
+void Board::makeMove(int index) {
+    makeMove(index / SIZE_OF_BOARD, index % SIZE_OF_BOARD);
+}
+void Board::undoMove(int index) {
+    undoMove(index / SIZE_OF_BOARD, index % SIZE_OF_BOARD);
 }

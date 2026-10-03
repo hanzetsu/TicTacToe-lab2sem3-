@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(tictactoe CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -18,12 +18,17 @@ add_library(core
     src/core/Board.cpp
 )
 
-target_include_directories(core PUBLIC src)
+target_include_directories(core PUBLIC
+    src
+    third_party/oldlab/include
+)
 
 add_executable(tictactoe
     src/main.cpp
 )
-target_link_libraries(tictactoe PRIVATE core)
+target_link_libraries(tictactoe PRIVATE core
+
+)
 
 
 enable_testing()

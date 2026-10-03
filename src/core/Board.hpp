@@ -1,6 +1,7 @@
 #pragma once
 #include "Exceptions.hpp"
 #include <iostream>
+#include "MutableArraySequence.hpp"
 class Board {
     private:
     int board[3][3] = {0};
@@ -19,4 +20,7 @@ class Board {
     bool isWin(int player) const;
     bool isGameOver() const;
     void print() const;
+    MutableArraySequence<int> getEmptyCells() const;
+    void makeMove(int index);
+    void undoMove(int index);
 };
