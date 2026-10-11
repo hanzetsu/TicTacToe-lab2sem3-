@@ -97,7 +97,7 @@ TEST(AlphaBetaAgent, SameBestMoveAsMinimax)
     EXPECT_TRUE(m1 == m2);
 }
 
-TEST(CachedMinimaxяAgent, TakesWinningMove)
+TEST(CachedMinimaxAgent, TakesWinningMove)
 {
     Board b;
     b.makeMove(0, 0);

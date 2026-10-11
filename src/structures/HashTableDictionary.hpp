@@ -24,7 +24,7 @@ private:
 
     int hash(const TKey &key) const
     {
-        uint32_t h = (uint32_t)key * 2654435761u;
+        uint64_t h = (uint64_t)key * 11400714819323198485ULL;
         return (int)(h % capacity);
     }
 

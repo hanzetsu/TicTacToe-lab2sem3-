@@ -14,11 +14,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
+# ---- core ----
 add_library(core
     src/core/Board.cpp
-    src/structures/IDictionary.hpp
-    src/structures/HashTableDictionary.hpp
+    src/benchmark/Benchmark.cpp
 )
+target_include_directories(core PUBLIC
+    src
+    third_party/oldlab/include
+)
+
+# ---- agents ----
 add_library(agents
     src/agents/MinimaxAgent.cpp
     src/agents/AlphaBetaAgent.cpp
@@ -30,21 +36,12 @@ add_library(agents
 )
 target_link_libraries(agents PUBLIC core)
 
-target_include_directories(core PUBLIC
-    src
-    third_party/oldlab/include
-)
-
+# ---- tictactoe ----
 add_executable(tictactoe
     src/main.cpp
 )
-target_link_libraries(tictactoe PRIVATE core
+target_link_libraries(tictactoe PRIVATE core agents)   # ← вот ключевая строка
 
-)
-
-
+# ---- tests ----
 enable_testing()
 add_subdirectory(tests)
-
-add_executable(debug src/debug.cpp)
-target_link_libraries(debug PRIVATE core)

@@ -1,44 +1,41 @@
 #include <iostream>
+#include <string>
 #include "core/Board.hpp"
+#include "agents/MinimaxAgent.hpp"
+#include "agents/AlphaBetaAgent.hpp"
+#include "agents/CachedMinimaxAgent.hpp"
+#include "benchmark/Benchmark.hpp"
 
-int main()
-{
-    Board b;
-    b.print();
-    while (!b.isGameOver())
-    {
+void runBenchmark() {
+    Benchmark bm("results.csv");
 
-        int r, c;
-        std::cout << "Ход " << (b.whoseMove() == 1 ? 'X' : 'O') << '\n';
-        std::cout << "Введите ряд и столбец (1-3): ";
-        if (!(std::cin >> r >> c))
-        {
-            std::cin.clear();             // сбросить fail state
-            std::cin.ignore(10000, '\n'); // выбросить буфер до конца строки
-            std::cout << "Некорректный ввод.\n";
-            continue;
-        }
+    // 3×3, полная глубина
+    Board b3(3, 3);
+    MinimaxAgent       mm9(9);
+    AlphaBetaAgent     ab9(9);
+    CachedMinimaxAgent cm9(9);
 
-        if (r < 1 || r > 3 || c < 1 || c > 3)
-        {
-            std::cout << "Координаты должны быть от 1 до 3.\n";
-            b.print();
-            continue;
-        }
-        --r;
-        --c;
-        if (!b.makeMove(r, c))
-        {
-            std::cout << "Клетка занята, попробуйте снова.\n";
-            b.print();
-            continue; // не выходим, повторим ход
-        }
-        b.print();
+    bm.Run(mm9, "minimax",  "3x3_empty", b3);
+    bm.Run(ab9, "alphabeta","3x3_empty", b3);
+    bm.Run(cm9, "cached",   "3x3_empty", b3);
+
+    // 4×4, ограниченная глубина
+    Board b4(4, 3);
+MinimaxAgent       mm4(4);
+AlphaBetaAgent     ab4(4);
+CachedMinimaxAgent cm4(4);
+
+    bm.Run(mm4, "minimax",  "4x4_d5", b4);
+    bm.Run(ab4, "alphabeta","4x4_d5", b4);
+    bm.Run(cm4, "cached",   "4x4_d5", b4);
+
+    std::cout << "Written to results.csv\n";
+}
+
+int main(int argc, char** argv) {
+    if (argc > 1 && std::string(argv[1]) == "bench") {
+        runBenchmark();
+        return 0;
     }
-    if (b.isWin(1))
-        std::cout << "X победил!\n";
-    else if (b.isWin(2))
-        std::cout << "O победил!\n";
-    else
-        std::cout << "Ничья.\n";
+    // ... обычная игра ...
 }

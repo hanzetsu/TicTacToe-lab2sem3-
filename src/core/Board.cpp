@@ -1,151 +1,154 @@
-#include "Board.hpp"
-void Board::CheckIndex(int r, int c) const
-{
-    if (r >= SIZE_OF_BOARD || r < 0)
-    {
-        throw IndexOutOfRange(r, SIZE_OF_BOARD, "Вы вышли за границы поля");
-    }
-    if (c >= SIZE_OF_BOARD || c < 0)
-    {
-        throw IndexOutOfRange(c, SIZE_OF_BOARD, "Вы вышли за границы поля");
-    }
+#include "core/Board.hpp"
+#include "Exceptions.hpp"
+
+Board::Board(int n, int k) : N(n), K(k), cells(n * n, 0) {}
+
+void Board::checkIndex(int r, int c) const {
+    if (r < 0 || r >= N)
+        throw IndexOutOfRange(r, N, "Board::checkIndex: row out of range");
+    if (c < 0 || c >= N)
+        throw IndexOutOfRange(c, N, "Board::checkIndex: col out of range");
 }
-bool Board::isCellTaken(int r, int c) const
-{
-    CheckIndex(r, c);
-    return board[r][c] != 0;
+
+int Board::getCell(int r, int c) const {
+    checkIndex(r, c);
+    return cells[r * N + c];
 }
-int Board::getCell(int row, int col) const
-{
-    CheckIndex(row, col);
-    return board[row][col];
+
+bool Board::isCellTaken(int r, int c) const {
+    checkIndex(r, c);
+    return cells[r * N + c] != 0;
 }
-int Board::countMoves() const
-{ // функция подсчета ходов, первыми всегда начинают крестики
-    int count = 0;
-    for (int i = 0; i < SIZE_OF_BOARD; i++)
-    {
-        for (int j = 0; j < SIZE_OF_BOARD; j++)
-        {
-            if (board[i][j] != 0)
-                count += 1;
+
+bool Board::makeMove(int r, int c) {
+    checkIndex(r, c);
+    if (cells[r * N + c] != 0) return false;
+    cells[r * N + c] = whoseMove();
+    return true;
+}
+
+bool Board::makeMove(int index) {
+    return makeMove(index / N, index % N);
+}
+
+bool Board::undoMove(int r, int c) {
+    checkIndex(r, c);
+    if (cells[r * N + c] == 0) return false;
+    cells[r * N + c] = 0;
+    return true;
+}
+
+bool Board::undoMove(int index) {
+    return undoMove(index / N, index % N);
+}
+int Board::countMoves() const {
+    int cnt = 0;
+    for (int v : cells) if (v != 0) ++cnt;
+    return cnt;
+}
+
+int Board::whoseMove() const {
+    return (countMoves() % 2) + 1;
+}
+
+bool Board::isWin(int player) const {
+    // Горизонтали
+    for (int r = 0; r < N; ++r)
+        for (int c = 0; c + K <= N; ++c) {
+            bool ok = true;
+            for (int k = 0; k < K; ++k)
+                if (cells[r * N + c + k] != player) { ok = false; break; }
+            if (ok) return true;
         }
-    }
-    return count;
-}
-int Board::whoseMove() const
-{
-    return (countMoves() % 2) + 1; // 1 - крестики; 2 - нолики;
-}
-bool Board::makeMove(int row, int col)
-{
-    CheckIndex(row, col);
-    if (isCellTaken(row, col))
-    {
-        return false;
-    }
-    if (whoseMove() == 1) // крестики
-    {
-        board[row][col] = 1;
-    }
-    else // нолики
-    {
-        board[row][col] = 2;
-    }
-    return true;
-}
-
-bool Board::undoMove(int row, int col)
-{
-    CheckIndex(row, col);
-    if (!isCellTaken(row, col))
-    {
-        return false;
-    }
-    board[row][col] = 0;
-    return true;
+    // Вертикали
+    for (int r = 0; r + K <= N; ++r)
+        for (int c = 0; c < N; ++c) {
+            bool ok = true;
+            for (int k = 0; k < K; ++k)
+                if (cells[(r + k) * N + c] != player) { ok = false; break; }
+            if (ok) return true;
+        }
+    // Диагонали ↘
+    for (int r = 0; r + K <= N; ++r)
+        for (int c = 0; c + K <= N; ++c) {
+            bool ok = true;
+            for (int k = 0; k < K; ++k)
+                if (cells[(r + k) * N + c + k] != player) { ok = false; break; }
+            if (ok) return true;
+        }
+    // Диагонали ↙
+    for (int r = 0; r + K <= N; ++r)
+        for (int c = K - 1; c < N; ++c) {
+            bool ok = true;
+            for (int k = 0; k < K; ++k)
+                if (cells[(r + k) * N + c - k] != player) { ok = false; break; }
+            if (ok) return true;
+        }
+    return false;
 }
 
-bool Board::isDraw() const
-{
+bool Board::isDraw() const {
     if (isWin(1) || isWin(2)) return false;
-    for (int i = 0; i < SIZE_OF_BOARD; i++)
-    {
-        for (int j = 0; j < SIZE_OF_BOARD; j++)
-        {
-            if (!isCellTaken(i, j))
-            {
-                return false;
-            }
-        }
-    }
+    for (int v : cells) if (v == 0) return false;
     return true;
 }
-bool Board::isWin(int player) const
-{
-    if (board[0][0] == player && board[0][1] == player && board[0][2] == player)
-        return true;
-    if (board[1][0] == player && board[1][1] == player && board[1][2] == player)
-        return true;
-    if (board[2][0] == player && board[2][1] == player && board[2][2] == player)
-        return true;
 
-    if (board[0][0] == player && board[1][0] == player && board[2][0] == player)
-        return true;
-    if (board[0][1] == player && board[1][1] == player && board[2][1] == player)
-        return true;
-    if (board[0][2] == player && board[1][2] == player && board[2][2] == player)
-        return true;
-
-    if (board[0][0] == player && board[1][1] == player && board[2][2] == player)
-        return true;
-    if (board[0][2] == player && board[1][1] == player && board[2][0] == player)
-        return true;
-
-    return false;
+bool Board::isGameOver() const {
+    return isWin(1) || isWin(2) || isDraw();
 }
-bool Board::isGameOver() const
-{
-    if (isWin(1) || isWin(2) || isDraw())
-        return true;
-    return false;
+
+uint64_t Board::getState() const {
+    uint64_t s = 0;
+    for (int i = 0; i < N * N; ++i)
+        s |= (uint64_t(cells[i]) << (i * 2));
+    return s;
+}
+
+MutableArraySequence<int> Board::getEmptyCells() const {
+    MutableArraySequence<int> result;
+    for (int i = 0; i < N * N; ++i)
+        if (cells[i] == 0) result.Append(i);
+    return result;
 }
 
 void Board::print() const {
-    for (int r = 0; r < SIZE_OF_BOARD; ++r) {
-        for (int c = 0; c < SIZE_OF_BOARD; ++c) {
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N; ++c) {
             char ch = '.';
-            if (board[r][c] == 1) ch = 'X';
-            else if (board[r][c] == 2) ch = 'O';
+            if (cells[r * N + c] == 1) ch = 'X';
+            else if (cells[r * N + c] == 2) ch = 'O';
             std::cout << ch << ' ';
         }
         std::cout << '\n';
     }
 }
 
-MutableArraySequence<int> Board::getEmptyCells() const {
-    MutableArraySequence<int>  result;
-    for (int i = 0; i < SIZE_OF_BOARD; i++) {
-        for (int j = 0; j < SIZE_OF_BOARD; j++) {
-            if(!isCellTaken(i,j)) {
-                result.Append(i * SIZE_OF_BOARD + j);
-            }
+int Board::evaluate(int player) const {
+    int score = 0;
+
+    auto countLine = [&](int r1, int c1, int dr, int dc) {
+        int xc = 0, oc = 0;
+        for (int k = 0; k < K; ++k) {
+            int v = cells[(r1 + dr * k) * N + (c1 + dc * k)];
+            if (v == 1) ++xc;
+            else if (v == 2) ++oc;
         }
-    }
-    return result;
-}
+        if (oc == 0) score += xc;
+        if (xc == 0) score -= oc;
+    };
 
-void Board::makeMove(int index) {
-    makeMove(index / SIZE_OF_BOARD, index % SIZE_OF_BOARD);
-}
-void Board::undoMove(int index) {
-    undoMove(index / SIZE_OF_BOARD, index % SIZE_OF_BOARD);
-}
+    // Горизонтали
+    for (int r = 0; r < N; ++r)
+        for (int c = 0; c + K <= N; ++c) countLine(r, c, 0, 1);
+    // Вертикали
+    for (int r = 0; r + K <= N; ++r)
+        for (int c = 0; c < N; ++c) countLine(r, c, 1, 0);
+    // Диагонали ↘
+    for (int r = 0; r + K <= N; ++r)
+        for (int c = 0; c + K <= N; ++c) countLine(r, c, 1, 1);
+    // Диагонали ↙
+    for (int r = 0; r + K <= N; ++r)
+        for (int c = K - 1; c < N; ++c) countLine(r, c, 1, -1);
 
-uint32_t Board::getState() const {
-    uint32_t state = 0;
-    for (int r = 0; r < SIZE_OF_BOARD; ++r)
-        for (int c = 0; c < SIZE_OF_BOARD; ++c)
-            state |= (uint32_t(board[r][c]) << ((r * SIZE_OF_BOARD + c) * 2));
-    return state;
+    return (player == 1) ? score : -score;
 }
