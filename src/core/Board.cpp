@@ -141,3 +141,11 @@ void Board::makeMove(int index) {
 void Board::undoMove(int index) {
     undoMove(index / SIZE_OF_BOARD, index % SIZE_OF_BOARD);
 }
+
+uint32_t Board::getState() const {
+    uint32_t state = 0;
+    for (int r = 0; r < SIZE_OF_BOARD; ++r)
+        for (int c = 0; c < SIZE_OF_BOARD; ++c)
+            state |= (uint32_t(board[r][c]) << ((r * SIZE_OF_BOARD + c) * 2));
+    return state;
+}

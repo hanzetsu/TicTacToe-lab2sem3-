@@ -215,3 +215,15 @@ TEST(BoardEmptyCells, EmptyBoardHas9Cells) {
     auto cells = b.getEmptyCells();
     EXPECT_EQ(cells.GetLength(), 9);
 }
+
+TEST(BoardState, EmptyBoardIsZero) {
+    Board b;
+    EXPECT_EQ(b.getState(), 0u);
+}
+
+TEST(BoardState, DifferentPositionsDifferentStates) {
+    Board a, b;
+    a.makeMove(0, 0);       // X
+    b.makeMove(0, 1);       // X в другой клетке
+    EXPECT_NE(a.getState(), b.getState());
+}
