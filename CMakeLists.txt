@@ -22,6 +22,11 @@ add_library(core
 add_library(agents
     src/agents/MinimaxAgent.cpp
     src/agents/AlphaBetaAgent.cpp
+    src/agents/CachedMinimaxAgent.cpp
+    src/agents/IAgent.hpp
+    src/agents/MinimaxAgent.hpp
+    src/agents/AlphaBetaAgent.hpp
+    src/agents/CachedMinimaxAgent.hpp
 )
 target_link_libraries(agents PUBLIC core)
 
