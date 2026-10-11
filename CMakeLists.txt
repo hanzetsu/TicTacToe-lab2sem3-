@@ -16,6 +16,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_library(core
     src/core/Board.cpp
+    src/structures/IDictionary.hpp
+    src/structures/HashTableDictionary.hpp
 )
 add_library(agents
     src/agents/MinimaxAgent.cpp
@@ -38,3 +40,6 @@ target_link_libraries(tictactoe PRIVATE core
 
 enable_testing()
 add_subdirectory(tests)
+
+add_executable(debug src/debug.cpp)
+target_link_libraries(debug PRIVATE core)

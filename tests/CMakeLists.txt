@@ -1,6 +1,7 @@
 add_executable(tests
     test_board.cpp
     test_agents.cpp
+    test_dictionary.cpp
 )
 
 target_link_libraries(tests PRIVATE
