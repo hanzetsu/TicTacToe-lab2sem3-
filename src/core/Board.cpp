@@ -111,15 +111,15 @@ bool Board::isGameOver() const
     return false;
 }
 
-void Board::print() const
-{
-    for (int i = 0; i < SIZE_OF_BOARD; i++)
-    {
-        for (int j = 0; j < SIZE_OF_BOARD; j++)
-        {
-            std::cout << board[i][j] << " ";
+void Board::print() const {
+    for (int r = 0; r < SIZE_OF_BOARD; ++r) {
+        for (int c = 0; c < SIZE_OF_BOARD; ++c) {
+            char ch = '.';
+            if (board[r][c] == 1) ch = 'X';
+            else if (board[r][c] == 2) ch = 'O';
+            std::cout << ch << ' ';
         }
-        std::cout << std::endl;
+        std::cout << '\n';
     }
 }
 

@@ -17,6 +17,11 @@ FetchContent_MakeAvailable(googletest)
 add_library(core
     src/core/Board.cpp
 )
+add_library(agents
+    src/agents/MinimaxAgent.cpp
+    src/agents/AlphaBetaAgent.cpp
+)
+target_link_libraries(agents PUBLIC core)
 
 target_include_directories(core PUBLIC
     src
