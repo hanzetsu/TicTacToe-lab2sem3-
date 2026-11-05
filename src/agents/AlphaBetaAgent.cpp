@@ -63,7 +63,7 @@ int AlphaBetaAgent::alphaBetaSearch(Board& board, int depth, int alpha, int beta
     }
 
     int finalScore;
-
+       
     if (board.isGameOver() || depth >= maxDepth) {
         finalScore = evaluate(board, depth);
     } else {

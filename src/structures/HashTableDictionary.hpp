@@ -109,7 +109,7 @@ public:
         LinkedList<Pair<TKey, TValue>>* newBucket = new LinkedList<Pair<TKey, TValue>>();
         bool found = false;
         for (int i = 0; i < len; ++i)
-        {
+        { 
             Pair<TKey, TValue> p = bucket->Get(i);
             if (p.key == key)
             {
