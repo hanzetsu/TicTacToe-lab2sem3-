@@ -4,7 +4,7 @@
 
 class MinimaxAgent : public IAgent {
 public:
-    explicit MinimaxAgent(int maxDepth = 9);  
+    MinimaxAgent(int maxDepth = 9);  
     int chooseMove(const Board& board) const override;
 private:
     int maxDepth;                        

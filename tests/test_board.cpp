@@ -223,7 +223,7 @@ TEST(BoardState, EmptyBoardIsZero) {
 
 TEST(BoardState, DifferentPositionsDifferentStates) {
     Board a, b;
-    a.makeMove(0, 0);       // X
-    b.makeMove(0, 1);       // X в другой клетке
+    a.makeMove(0, 0);       
+    b.makeMove(0, 1);       
     EXPECT_NE(a.getState(), b.getState());
 }

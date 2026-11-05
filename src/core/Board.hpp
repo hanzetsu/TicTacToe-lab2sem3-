@@ -1,29 +1,28 @@
 #pragma once
-#include <vector>
 #include <cstdint>
 #include <iostream>
 #include "MutableArraySequence.hpp"
 
 class Board {
 private:
-    int N;
-    int K;
-    std::vector<int> cells;
+    int boardSize;              
+    int winLength;               
+    MutableArraySequence<int> cells;
 
-    void checkIndex(int r, int c) const;
+    void checkIndex(int row, int col) const;
 
 public:
     Board(int n = 3, int k = 3);
 
-    int GetSize() const { return N; }
-    int GetK()    const { return K; }
+    int GetSize() const { return boardSize; }
+    int GetK()    const { return winLength; }
 
-    int  getCell(int r, int c) const;
-    bool isCellTaken(int r, int c) const;
+    int  getCell(int row, int col) const;
+    bool isCellTaken(int row, int col) const;
 
-    bool makeMove(int r, int c);
+    bool makeMove(int row, int col);
     bool makeMove(int index);
-    bool undoMove(int r, int c);
+    bool undoMove(int row, int col);
     bool undoMove(int index);
 
     int  countMoves() const;

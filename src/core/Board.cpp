@@ -1,49 +1,60 @@
 #include "core/Board.hpp"
 #include "Exceptions.hpp"
 
-Board::Board(int n, int k) : N(n), K(k), cells(n * n, 0) {}
-
-void Board::checkIndex(int r, int c) const {
-    if (r < 0 || r >= N)
-        throw IndexOutOfRange(r, N, "Board::checkIndex: row out of range");
-    if (c < 0 || c >= N)
-        throw IndexOutOfRange(c, N, "Board::checkIndex: col out of range");
+Board::Board(int n, int k) : boardSize(n), winLength(k) {
+    for (int i = 0; i < boardSize * boardSize; ++i) {
+        cells.Append(0);
+    }
 }
 
-int Board::getCell(int r, int c) const {
-    checkIndex(r, c);
-    return cells[r * N + c];
+void Board::checkIndex(int row, int col) const {
+    if (row < 0 || row >= boardSize)
+        throw IndexOutOfRange(static_cast<std::size_t>(row), static_cast<std::size_t>(boardSize), 
+                              "Board::checkIndex: row out of range");
+    if (col < 0 || col >= boardSize)
+        throw IndexOutOfRange(static_cast<std::size_t>(col), static_cast<std::size_t>(boardSize), 
+                              "Board::checkIndex: col out of range");
 }
 
-bool Board::isCellTaken(int r, int c) const {
-    checkIndex(r, c);
-    return cells[r * N + c] != 0;
+int Board::getCell(int row, int col) const {
+    checkIndex(row, col);
+    return cells.Get(row * boardSize + col);
 }
 
-bool Board::makeMove(int r, int c) {
-    checkIndex(r, c);
-    if (cells[r * N + c] != 0) return false;
-    cells[r * N + c] = whoseMove();
+bool Board::isCellTaken(int row, int col) const {
+    checkIndex(row, col);
+    return cells.Get(row * boardSize + col) != 0;
+}
+
+bool Board::makeMove(int row, int col) {
+    checkIndex(row, col);
+    int idx = row * boardSize + col;
+    if (cells.Get(idx) != 0) return false;
+    cells.Set(idx, whoseMove());
     return true;
 }
 
 bool Board::makeMove(int index) {
-    return makeMove(index / N, index % N);
+    return makeMove(index / boardSize, index % boardSize);
 }
 
-bool Board::undoMove(int r, int c) {
-    checkIndex(r, c);
-    if (cells[r * N + c] == 0) return false;
-    cells[r * N + c] = 0;
+bool Board::undoMove(int row, int col) {
+    checkIndex(row, col);
+    int idx = row * boardSize + col;
+    if (cells.Get(idx) == 0) return false;
+    cells.Set(idx, 0);
     return true;
 }
 
 bool Board::undoMove(int index) {
-    return undoMove(index / N, index % N);
+    return undoMove(index / boardSize, index % boardSize);
 }
+
 int Board::countMoves() const {
     int cnt = 0;
-    for (int v : cells) if (v != 0) ++cnt;
+    for (int i = 0; i < boardSize * boardSize; ++i) {
+        if (cells.Get(i) != 0) ++cnt;
+    }
     return cnt;
 }
 
@@ -52,36 +63,32 @@ int Board::whoseMove() const {
 }
 
 bool Board::isWin(int player) const {
-    // Горизонтали
-    for (int r = 0; r < N; ++r)
-        for (int c = 0; c + K <= N; ++c) {
+    for (int row = 0; row < boardSize; ++row)
+        for (int col = 0; col + winLength <= boardSize; ++col) {
             bool ok = true;
-            for (int k = 0; k < K; ++k)
-                if (cells[r * N + c + k] != player) { ok = false; break; }
+            for (int k = 0; k < winLength; ++k)
+                if (cells.Get(row * boardSize + col + k) != player) { ok = false; break; }
             if (ok) return true;
         }
-    // Вертикали
-    for (int r = 0; r + K <= N; ++r)
-        for (int c = 0; c < N; ++c) {
+    for (int row = 0; row + winLength <= boardSize; ++row)
+        for (int col = 0; col < boardSize; ++col) {
             bool ok = true;
-            for (int k = 0; k < K; ++k)
-                if (cells[(r + k) * N + c] != player) { ok = false; break; }
+            for (int k = 0; k < winLength; ++k)
+                if (cells.Get((row + k) * boardSize + col) != player) { ok = false; break; }
             if (ok) return true;
         }
-    // Диагонали ↘
-    for (int r = 0; r + K <= N; ++r)
-        for (int c = 0; c + K <= N; ++c) {
+    for (int row = 0; row + winLength <= boardSize; ++row)
+        for (int col = 0; col + winLength <= boardSize; ++col) {
             bool ok = true;
-            for (int k = 0; k < K; ++k)
-                if (cells[(r + k) * N + c + k] != player) { ok = false; break; }
+            for (int k = 0; k < winLength; ++k)
+                if (cells.Get((row + k) * boardSize + col + k) != player) { ok = false; break; }
             if (ok) return true;
         }
-    // Диагонали ↙
-    for (int r = 0; r + K <= N; ++r)
-        for (int c = K - 1; c < N; ++c) {
+    for (int row = 0; row + winLength <= boardSize; ++row)
+        for (int col = winLength - 1; col < boardSize; ++col) {
             bool ok = true;
-            for (int k = 0; k < K; ++k)
-                if (cells[(r + k) * N + c - k] != player) { ok = false; break; }
+            for (int k = 0; k < winLength; ++k)
+                if (cells.Get((row + k) * boardSize + col - k) != player) { ok = false; break; }
             if (ok) return true;
         }
     return false;
@@ -89,7 +96,9 @@ bool Board::isWin(int player) const {
 
 bool Board::isDraw() const {
     if (isWin(1) || isWin(2)) return false;
-    for (int v : cells) if (v == 0) return false;
+    for (int i = 0; i < boardSize * boardSize; ++i) {
+        if (cells.Get(i) == 0) return false;
+    }
     return true;
 }
 
@@ -98,25 +107,26 @@ bool Board::isGameOver() const {
 }
 
 uint64_t Board::getState() const {
-    uint64_t s = 0;
-    for (int i = 0; i < N * N; ++i)
-        s |= (uint64_t(cells[i]) << (i * 2));
-    return s;
+    uint64_t state = 0;
+    for (int i = 0; i < boardSize * boardSize; ++i)
+        state |= (uint64_t(cells.Get(i)) << (i * 2));
+    return state;
 }
 
 MutableArraySequence<int> Board::getEmptyCells() const {
     MutableArraySequence<int> result;
-    for (int i = 0; i < N * N; ++i)
-        if (cells[i] == 0) result.Append(i);
+    for (int i = 0; i < boardSize * boardSize; ++i)
+        if (cells.Get(i) == 0) result.Append(i);
     return result;
 }
 
 void Board::print() const {
-    for (int r = 0; r < N; ++r) {
-        for (int c = 0; c < N; ++c) {
+    for (int row = 0; row < boardSize; ++row) {
+        for (int col = 0; col < boardSize; ++col) {
             char ch = '.';
-            if (cells[r * N + c] == 1) ch = 'X';
-            else if (cells[r * N + c] == 2) ch = 'O';
+            int val = cells.Get(row * boardSize + col);
+            if (val == 1) ch = 'X';
+            else if (val == 2) ch = 'O';
             std::cout << ch << ' ';
         }
         std::cout << '\n';
@@ -126,29 +136,46 @@ void Board::print() const {
 int Board::evaluate(int player) const {
     int score = 0;
 
-    auto countLine = [&](int r1, int c1, int dr, int dc) {
-        int xc = 0, oc = 0;
-        for (int k = 0; k < K; ++k) {
-            int v = cells[(r1 + dr * k) * N + (c1 + dc * k)];
-            if (v == 1) ++xc;
-            else if (v == 2) ++oc;
+    auto countLine = [&](int startRow, int startCol, int rowStep, int colStep) {
+        int xCount = 0;
+        int oCount = 0;
+
+        for (int k = 0; k < winLength; ++k) {
+            int val = cells.Get((startRow + rowStep * k) * boardSize + (startCol + colStep * k));
+            if (val == 1) ++xCount;
+            else if (val == 2) ++oCount;
         }
-        if (oc == 0) score += xc;
-        if (xc == 0) score -= oc;
+
+        if (oCount == 0) {
+            if (xCount == 1) score += 1;
+            else if (xCount == 2) score += 10;
+            else if (xCount == 3) score += 100;
+            else if (xCount == 4) score += 1000;
+        }
+        
+        if (xCount == 0) {
+            if (oCount == 1) score -= 1;
+            else if (oCount == 2) score -= 10;
+            else if (oCount == 3) score -= 100;
+            else if (oCount == 4) score -= 1000;
+        }
     };
 
-    // Горизонтали
-    for (int r = 0; r < N; ++r)
-        for (int c = 0; c + K <= N; ++c) countLine(r, c, 0, 1);
-    // Вертикали
-    for (int r = 0; r + K <= N; ++r)
-        for (int c = 0; c < N; ++c) countLine(r, c, 1, 0);
-    // Диагонали ↘
-    for (int r = 0; r + K <= N; ++r)
-        for (int c = 0; c + K <= N; ++c) countLine(r, c, 1, 1);
-    // Диагонали ↙
-    for (int r = 0; r + K <= N; ++r)
-        for (int c = K - 1; c < N; ++c) countLine(r, c, 1, -1);
+    for (int row = 0; row < boardSize; ++row)
+        for (int col = 0; col + winLength <= boardSize; ++col) 
+            countLine(row, col, 0, 1);
+
+    for (int row = 0; row + winLength <= boardSize; ++row)
+        for (int col = 0; col < boardSize; ++col) 
+            countLine(row, col, 1, 0);
+
+    for (int row = 0; row + winLength <= boardSize; ++row)
+        for (int col = 0; col + winLength <= boardSize; ++col) 
+            countLine(row, col, 1, 1);
+
+    for (int row = 0; row + winLength <= boardSize; ++row)
+        for (int col = winLength - 1; col < boardSize; ++col) 
+            countLine(row, col, 1, -1);
 
     return (player == 1) ? score : -score;
 }

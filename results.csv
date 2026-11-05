@@ -1,7 +1,0 @@
-algorithm,scenario,time_ms
-minimax,3x3_empty,46.849
-alphabeta,3x3_empty,3.73
-cached,3x3_empty,6.928
-minimax,4x4_d5,166.696
-alphabeta,4x4_d5,33.863
-cached,4x4_d5,956.328

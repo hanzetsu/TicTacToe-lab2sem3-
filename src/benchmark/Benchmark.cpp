@@ -1,11 +1,12 @@
 #include "benchmark/Benchmark.hpp"
+#include "Exceptions.hpp"
 #include <chrono>
 
 Benchmark::Benchmark(const std::string& csvPath)
     : path(csvPath), headerWritten(false) {
     file.open(path);
     if (!file.is_open()) {
-        throw std::runtime_error("Cannot open " + path);
+        throw InvalidArgument("Cannot open " + path);
     }
 }
 

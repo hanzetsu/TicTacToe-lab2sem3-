@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "structures/HashTableDictionary.hpp"
-#include <stdexcept>
+#include "Exceptions.hpp" // Добавлен инклуд
 
 TEST(Dictionary, EmptyHasZeroCount) {
     HashTableDictionary<uint32_t, int> d;
@@ -41,7 +41,7 @@ TEST(Dictionary, ContainsKeyFalseForMissing) {
 TEST(Dictionary, GetThrowsForMissing) {
     HashTableDictionary<uint32_t, int> d;
     d.Add(1, 10);
-    EXPECT_THROW(d.Get(2), std::runtime_error);
+    EXPECT_THROW(d.Get(2), InvalidArgument); 
 }
 
 TEST(Dictionary, AddSameKeyOverwrites) {
@@ -65,11 +65,10 @@ TEST(Dictionary, RemoveDecreasesCount) {
 TEST(Dictionary, RemoveThrowsForMissing) {
     HashTableDictionary<uint32_t, int> d;
     d.Add(1, 10);
-    EXPECT_THROW(d.Remove(99), std::runtime_error);
+    EXPECT_THROW(d.Remove(99), InvalidArgument);
 }
 
 TEST(Dictionary, HandlesCollisions) {
-    // capacity = 1 → все ключи попадают в один бакет
     HashTableDictionary<uint32_t, int> d(1);
     d.Add(10, 100);
     d.Add(20, 200);
@@ -113,7 +112,6 @@ TEST(Dictionary, StressWithRemovals) {
     for (uint32_t i = 0; i < 100; ++i) {
         d.Add(i, (int)i);
     }
-    // удаляем чётные
     for (uint32_t i = 0; i < 100; i += 2) {
         d.Remove(i);
     }
@@ -130,12 +128,11 @@ TEST(Dictionary, StressWithRemovals) {
 }
 
 TEST(Dictionary, StoresTicTacToeStates) {
-    // Реалистичный сценарий: состояние поля → оценка
     HashTableDictionary<uint32_t, int> cache(25);
 
-    cache.Add(0u,        0);   // пустое поле
-    cache.Add(0b010000u, 1);   // X в клетке 1
-    cache.Add(0b100000u, 2);   // O в клетке 1
+    cache.Add(0u,        0);
+    cache.Add(0b010000u, 1);
+    cache.Add(0b100000u, 2);
 
     EXPECT_EQ(cache.Get(0u),        0);
     EXPECT_EQ(cache.Get(0b010000u), 1);
