@@ -8,6 +8,6 @@ public:
     int chooseMove(const Board& board) const override;
 private:
     int maxDepth;                        
-    int evaluate(const Board& board, int depth) const;
-    int minimax(Board& board, int depth, bool isMaximizing) const;
+    Score evaluate(const Board& board, int depth, int currentPlayer) const;
+    Score negamax(Board& board, int depth, int currentPlayer) const;
 };

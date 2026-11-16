@@ -15,11 +15,12 @@ TEST(MinimaxAgent, TakesWinningMove) {
 TEST(MinimaxAgent, DoesNotLoseFromEmpty) {
     Board b;
     MinimaxAgent agent;
-    while (!b.isGameOver()) {
+    // ИСПРАВЛЕНО: b.isGameOver() заменено на проверку GameState
+    while (b.getGameState() == GameState::Ongoing) {
         int move = agent.chooseMove(b);
         b.makeMove(move);
     }
-    EXPECT_TRUE(b.isDraw());
+    EXPECT_EQ(b.getGameState(), GameState::Draw);
 }
 
 TEST(AlphaBetaAgent, TakesWinningMove) {
@@ -44,11 +45,12 @@ TEST(AlphaBetaAgent, BlocksOpponentWin) {
 TEST(AlphaBetaAgent, DoesNotLoseFromEmpty) {
     Board b;
     AlphaBetaAgent agent;
-    while (!b.isGameOver()) {
+    // ИСПРАВЛЕНО: b.isGameOver() заменено на проверку GameState
+    while (b.getGameState() == GameState::Ongoing) {
         int move = agent.chooseMove(b);
         b.makeMove(move);
     }
-    EXPECT_TRUE(b.isDraw());
+    EXPECT_EQ(b.getGameState(), GameState::Draw);
 }
 
 TEST(AlphaBetaAgent, CacheDoesNotChangeResult) {

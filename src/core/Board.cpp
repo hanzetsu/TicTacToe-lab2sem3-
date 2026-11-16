@@ -21,6 +21,10 @@ int Board::getCell(int row, int col) const {
     return cells.Get(row * boardSize + col);
 }
 
+int Board::getCell(int index) const {
+    return cells.Get(index);
+}
+
 bool Board::isCellTaken(int row, int col) const {
     checkIndex(row, col);
     return cells.Get(row * boardSize + col) != 0;
@@ -102,22 +106,18 @@ bool Board::isDraw() const {
     return true;
 }
 
-bool Board::isGameOver() const {
-    return isWin(1) || isWin(2) || isDraw();
+GameState Board::getGameState() const {
+    if (isWin(1)) return GameState::WinX;
+    if (isWin(2)) return GameState::WinO;
+    if (isDraw()) return GameState::Draw;
+    return GameState::Ongoing;
 }
 
-uint64_t Board::getState() const {
+uint64_t Board::getState() const { 
     uint64_t state = 0;
     for (int i = 0; i < boardSize * boardSize; ++i)
         state |= (uint64_t(cells.Get(i)) << (i * 2));
     return state;
-}
-
-MutableArraySequence<int> Board::getEmptyCells() const {
-    MutableArraySequence<int> result;
-    for (int i = 0; i < boardSize * boardSize; ++i)
-        if (cells.Get(i) == 0) result.Append(i);
-    return result;
 }
 
 void Board::print() const {
@@ -133,8 +133,8 @@ void Board::print() const {
     }
 }
 
-int Board::evaluate(int player) const {
-    int score = 0;
+Score Board::evaluate(int player) const {
+    Score score = 0;
 
     auto countLine = [&](int startRow, int startCol, int rowStep, int colStep) {
         int xCount = 0;

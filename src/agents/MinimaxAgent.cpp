@@ -1,64 +1,54 @@
 #include "agents/MinimaxAgent.hpp"
 
-MinimaxAgent::MinimaxAgent(int md) : maxDepth(md) {}
+MinimaxAgent::MinimaxAgent(int maxDepth) : maxDepth(maxDepth) {}
 
-int MinimaxAgent::evaluate(const Board& board, int depth) const {
-    if (board.isWin(1)) return  10000 - depth;
-    if (board.isWin(2)) return -10000 + depth;
-    if (board.isDraw()) return 0;
-    return board.evaluate(1);
+Score MinimaxAgent::evaluate(const Board& board, int depth, int currentPlayer) const {
+    GameState state = board.getGameState();
+    
+    if (state == GameState::WinX) return (currentPlayer == 1) ? 10000 - depth : -10000 + depth;
+    if (state == GameState::WinO) return (currentPlayer == 2) ? 10000 - depth : -10000 + depth;
+    if (state == GameState::Draw) return 0;
+    
+    return board.evaluate(currentPlayer); 
 }
 
-int MinimaxAgent::minimax(Board& board, int depth, bool isMaximizing) const {
-    if (board.isGameOver() || depth >= maxDepth) {
-        return evaluate(board, depth);
+Score MinimaxAgent::negamax(Board& board, int depth, int currentPlayer) const {
+    // Используем getGameState()
+    if (board.getGameState() != GameState::Ongoing || depth >= maxDepth) {
+        return evaluate(board, depth, currentPlayer);
     }
 
-    auto moves = board.getEmptyCells();
-
-    if (isMaximizing) {
-        int best = -100000;
-        for (int i = 0; i < moves.GetLength(); ++i) {
-            int move = moves.Get(i);
-            board.makeMove(move);
-            int score = minimax(board, depth + 1, false);
-            board.undoMove(move);
-            if (score > best) best = score;
+    Score bestScore = -100000;
+    int size = board.GetSize();
+    
+    for (int i = 0; i < size * size; ++i) {
+        if (board.getCell(i) == 0) {
+            board.makeMove(i);
+            Score currentScore = -negamax(board, depth + 1, 3 - currentPlayer);
+            board.undoMove(i);
+            if (currentScore > bestScore) bestScore = currentScore;
         }
-        return best;
-    } else {
-        int best = 100000;
-        for (int i = 0; i < moves.GetLength(); ++i) {
-            int move = moves.Get(i);
-            board.makeMove(move);
-            int score = minimax(board, depth + 1, true);
-            board.undoMove(move);
-            if (score < best) best = score;
-        }
-        return best;
     }
+    return bestScore;
 }
 
 int MinimaxAgent::chooseMove(const Board& board) const {
     Board copy = board;
     int player = copy.whoseMove();
-
     int bestMove = -1;
-    int bestScore = (player == 1) ? -100000 : 100000;
+    Score bestScore = -100000;
+    int size = copy.GetSize();
 
-    auto moves = copy.getEmptyCells();
-    for (int i = 0; i < moves.GetLength(); ++i) {
-        int move = moves.Get(i);
-        copy.makeMove(move);
-        int score = minimax(copy, 0, player == 2);
-        copy.undoMove(move);
-
-        if (player == 1) {
-            if (score > bestScore) { bestScore = score; bestMove = move; }
-        } else {
-            if (score < bestScore) { bestScore = score; bestMove = move; }
+    for (int i = 0; i < size * size; ++i) {
+        if (copy.getCell(i) == 0) {
+            copy.makeMove(i);
+            Score score = -negamax(copy, 0, 3 - player);
+            copy.undoMove(i);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = i;
+            }
         }
     }
-
     return bestMove;
 }

@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     auto* central = new QWidget(this);
     auto* vbox = new QVBoxLayout(central);
 
-    // ---- Панель управления ----
     auto* controls = new QHBoxLayout();
 
     auto* newGameBtn = new QPushButton("Новая игра", central);
@@ -152,7 +151,8 @@ void MainWindow::refreshCell(int index) {
     else if (cell == 2) buttons[index]->setText("O");
     else buttons[index]->setText("");
 
-    buttons[index]->setEnabled(cell == 0 && !board.isGameOver() && isHumanTurn());
+    bool isOngoing = (board.getGameState() == GameState::Ongoing);
+    buttons[index]->setEnabled(cell == 0 && isOngoing && isHumanTurn());
 }
 
 void MainWindow::refreshAll() {
@@ -162,11 +162,12 @@ void MainWindow::refreshAll() {
 }
 
 void MainWindow::updateStatus() {
-    if (board.isWin(1))         statusLabel->setText("X победил!");
-    else if (board.isWin(2))    statusLabel->setText("O победил!");
-    else if (board.isDraw())    statusLabel->setText("Ничья");
-    else                        statusLabel->setText(
-        QString("Ход: %1").arg(board.whoseMove() == 1 ? "X" : "O"));
+    GameState state = board.getGameState();
+    
+    if (state == GameState::WinX)        statusLabel->setText("X победил!");
+    else if (state == GameState::WinO)   statusLabel->setText("O победил!");
+    else if (state == GameState::Draw)   statusLabel->setText("Ничья");
+    else                                 statusLabel->setText(QString("Ход: %1").arg(board.whoseMove() == 1 ? "X" : "O"));
 
     for (int i = 0; i < N * N; ++i) {
         refreshCell(i);
@@ -179,7 +180,7 @@ bool MainWindow::isHumanTurn() const {
 }
 
 void MainWindow::onCellClicked(int index) {
-    if (board.isGameOver()) return;
+    if (board.getGameState() != GameState::Ongoing) return;
     if (!isHumanTurn()) return;
 
     int r = index / N;
@@ -188,13 +189,13 @@ void MainWindow::onCellClicked(int index) {
     if (!board.makeMove(r, c)) return;
 
     updateStatus();
-    if (board.isGameOver()) return;
+    if (board.getGameState() != GameState::Ongoing) return;
 
     makeAgentMove();
 }
 
 void MainWindow::makeAgentMove() {
-    if (board.isGameOver()) return;
+    if (board.getGameState() != GameState::Ongoing) return;
     if (!agent) return;
 
     auto t0 = std::chrono::high_resolution_clock::now();

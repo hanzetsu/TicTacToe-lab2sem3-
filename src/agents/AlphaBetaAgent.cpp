@@ -3,11 +3,12 @@
 
 AlphaBetaAgent::AlphaBetaAgent(int maxDepth) : maxDepth(maxDepth) {}
 
-int AlphaBetaAgent::evaluate(const Board& board, int depth) const {
-    if (board.isWin(1)) return  10000 - depth;
-    if (board.isWin(2)) return -10000 + depth;
-    if (board.isDraw()) return 0;
-    return board.evaluate(1);
+Score AlphaBetaAgent::evaluate(const Board& board, int depth) const {
+    GameState state = board.getGameState();
+    if (state == GameState::WinX) return  10000 - depth;
+    if (state == GameState::WinO) return -10000 + depth;
+    if (state == GameState::Draw) return 0;
+    return board.evaluate(1); 
 }
 
 int AlphaBetaAgent::getCenterDistance(int cellIndex, int boardSize) const {
@@ -23,23 +24,34 @@ int AlphaBetaAgent::getCenterDistance(int cellIndex, int boardSize) const {
 }
 
 MutableArraySequence<int> AlphaBetaAgent::getOrderedMoves(const Board& board) const {
-    MutableArraySequence<int> cells = board.getEmptyCells();
+    MutableArraySequence<int> emptyCells;
     int boardSize = board.GetSize();
-    int n = cells.GetLength();
-
-    for (int i = 0; i < n - 1; ++i) {
-        for (int j = 0; j < n - i - 1; ++j) {
-            int dist1 = getCenterDistance(cells.Get(j), boardSize);
-            int dist2 = getCenterDistance(cells.Get(j + 1), boardSize);
-            
-            if (dist1 > dist2) {
-                int temp = cells.Get(j);
-                cells.Set(j, cells.Get(j + 1));
-                cells.Set(j + 1, temp);
-            }
+    
+    // Сами собираем пустые клетки
+    for (int i = 0; i < boardSize * boardSize; ++i) {
+        if (board.getCell(i) == 0) {
+            emptyCells.Append(i);
         }
     }
-    return cells;
+
+    // Дальше идет твоя пузырьковая сортировка (или сортировка вставками)
+    MutableArraySequence<int> sortedCells;
+    int totalMoves = emptyCells.GetLength();
+
+    for (int i = 0; i < totalMoves; ++i) {
+        int cellIndex = emptyCells.Get(i);
+        int distanceToCenter = getCenterDistance(cellIndex, boardSize);
+
+        int insertIndex = sortedCells.GetLength(); 
+        for (int j = 0; j < sortedCells.GetLength(); ++j) {
+            if (getCenterDistance(sortedCells.Get(j), boardSize) > distanceToCenter) {
+                insertIndex = j;
+                break;
+            }
+        }
+        sortedCells.InsertAt(cellIndex, insertIndex);
+    }
+    return sortedCells;
 }
 
 int AlphaBetaAgent::alphaBetaSearch(Board& board, int depth, int alpha, int beta,
@@ -63,12 +75,11 @@ int AlphaBetaAgent::alphaBetaSearch(Board& board, int depth, int alpha, int beta
     }
 
     int finalScore;
-       
-    if (board.isGameOver() || depth >= maxDepth) {
+
+    if (board.getGameState() != GameState::Ongoing || depth >= maxDepth) {
         finalScore = evaluate(board, depth);
     } else {
         MutableArraySequence<int> availableMoves = getOrderedMoves(board);
-
         if (isMaximizing) {
             int bestScore = -100000;
             for (int i = 0; i < availableMoves.GetLength(); ++i) {

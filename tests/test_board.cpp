@@ -8,12 +8,9 @@ TEST(BoardConstructor, NewBoardIsEmpty) {
             EXPECT_EQ(b.getCell(r, c), 0);
 }
 
-TEST(BoardConstructor, EmptyBoardIsNotGameOver) {
+TEST(BoardConstructor, EmptyBoardIsOngoing) {
     Board b;
-    EXPECT_FALSE(b.isWin(1));
-    EXPECT_FALSE(b.isWin(2));
-    EXPECT_FALSE(b.isDraw());
-    EXPECT_FALSE(b.isGameOver());
+    EXPECT_EQ(b.getGameState(), GameState::Ongoing);
 }
 
 TEST(BoardConstructor, XMovesFirst) {
@@ -89,8 +86,7 @@ TEST(BoardWin, TopRow) {
     b.makeMove(0,0); b.makeMove(1,0);
     b.makeMove(0,1); b.makeMove(1,1);
     b.makeMove(0,2);
-    EXPECT_TRUE(b.isWin(1));
-    EXPECT_FALSE(b.isWin(2));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, MiddleRow) {
@@ -98,7 +94,7 @@ TEST(BoardWin, MiddleRow) {
     b.makeMove(1,0); b.makeMove(0,0);
     b.makeMove(1,1); b.makeMove(0,1);
     b.makeMove(1,2);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, BottomRow) {
@@ -106,7 +102,7 @@ TEST(BoardWin, BottomRow) {
     b.makeMove(2,0); b.makeMove(0,0);
     b.makeMove(2,1); b.makeMove(0,1);
     b.makeMove(2,2);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, LeftColumn) {
@@ -114,7 +110,7 @@ TEST(BoardWin, LeftColumn) {
     b.makeMove(0,0); b.makeMove(0,1);
     b.makeMove(1,0); b.makeMove(1,1);
     b.makeMove(2,0);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, MiddleColumn) {
@@ -122,7 +118,7 @@ TEST(BoardWin, MiddleColumn) {
     b.makeMove(0,1); b.makeMove(0,0);
     b.makeMove(1,1); b.makeMove(1,0);
     b.makeMove(2,1);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, RightColumn) {
@@ -130,7 +126,7 @@ TEST(BoardWin, RightColumn) {
     b.makeMove(0,2); b.makeMove(0,0);
     b.makeMove(1,2); b.makeMove(1,0);
     b.makeMove(2,2);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, MainDiagonal) {
@@ -138,7 +134,7 @@ TEST(BoardWin, MainDiagonal) {
     b.makeMove(0,0); b.makeMove(0,1);
     b.makeMove(1,1); b.makeMove(0,2);
     b.makeMove(2,2);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, AntiDiagonal) {
@@ -146,54 +142,37 @@ TEST(BoardWin, AntiDiagonal) {
     b.makeMove(0,2); b.makeMove(0,0);
     b.makeMove(1,1); b.makeMove(0,1);
     b.makeMove(2,0);
-    EXPECT_TRUE(b.isWin(1));
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardWin, OCanWinToo) {
     Board b;
-    b.makeMove(0,0);
-    b.makeMove(1,0);
-    b.makeMove(0,1);
-    b.makeMove(1,1);
-    b.makeMove(2,2);
-    b.makeMove(1,2);
-    EXPECT_TRUE(b.isWin(2));
-    EXPECT_FALSE(b.isWin(1));
+    b.makeMove(0,0); b.makeMove(1,0);
+    b.makeMove(0,1); b.makeMove(1,1);
+    b.makeMove(2,2); b.makeMove(1,2);
+    EXPECT_EQ(b.getGameState(), GameState::WinO);
 }
 
 TEST(BoardDraw, FullBoardWithoutWinnerIsDraw) {
     Board b;
-    b.makeMove(0,0);
-    b.makeMove(0,1);
-    b.makeMove(0,2);
-    b.makeMove(1,1);
-    b.makeMove(1,0);
-    b.makeMove(1,2);
-    b.makeMove(2,1);
-    b.makeMove(2,0);
+    b.makeMove(0,0); b.makeMove(0,1);
+    b.makeMove(0,2); b.makeMove(1,1);
+    b.makeMove(1,0); b.makeMove(1,2);
+    b.makeMove(2,1); b.makeMove(2,0);
     b.makeMove(2,2);
 
-    EXPECT_FALSE(b.isWin(1));
-    EXPECT_FALSE(b.isWin(2));
-    EXPECT_TRUE(b.isDraw());
-    EXPECT_TRUE(b.isGameOver());
+    EXPECT_EQ(b.getGameState(), GameState::Draw);
 }
 
 TEST(BoardDraw, WinOnLastMoveIsNotDraw) {
     Board b;
-    b.makeMove(0,0);
-    b.makeMove(1,0);
-    b.makeMove(0,1);
-    b.makeMove(1,1);
-    b.makeMove(0,2);
-    b.makeMove(2,0);
-    b.makeMove(1,2);
-    b.makeMove(2,2);
+    b.makeMove(0,0); b.makeMove(1,0);
+    b.makeMove(0,1); b.makeMove(1,1);
+    b.makeMove(0,2); b.makeMove(2,0);
+    b.makeMove(1,2); b.makeMove(2,2);
     b.makeMove(2,1);
 
-    EXPECT_TRUE(b.isWin(1));
-    EXPECT_FALSE(b.isDraw());
-    EXPECT_TRUE(b.isGameOver());
+    EXPECT_EQ(b.getGameState(), GameState::WinX);
 }
 
 TEST(BoardExceptions, NegativeIndexThrows) {
@@ -212,8 +191,11 @@ TEST(BoardExceptions, LargeIndexThrows) {
 
 TEST(BoardEmptyCells, EmptyBoardHas9Cells) {
     Board b;
-    auto cells = b.getEmptyCells();
-    EXPECT_EQ(cells.GetLength(), 9);
+    int emptyCount = 0;
+    for (int i = 0; i < 9; ++i) {
+        if (b.getCell(i) == 0) emptyCount++;
+    }
+    EXPECT_EQ(emptyCount, 9);
 }
 
 TEST(BoardState, EmptyBoardIsZero) {
@@ -223,7 +205,7 @@ TEST(BoardState, EmptyBoardIsZero) {
 
 TEST(BoardState, DifferentPositionsDifferentStates) {
     Board a, b;
-    a.makeMove(0, 0);       
-    b.makeMove(0, 1);       
+    a.makeMove(0, 0); 
+    b.makeMove(0, 1); 
     EXPECT_NE(a.getState(), b.getState());
 }
