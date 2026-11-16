@@ -9,5 +9,5 @@ public:
 private:
     int maxDepth;                        
     Score evaluate(const Board& board, int depth, int currentPlayer) const;
-    Score negamax(Board& board, int depth, int currentPlayer) const;
+    Score minimax(Board& board, int depth, int currentPlayer) const;
 };

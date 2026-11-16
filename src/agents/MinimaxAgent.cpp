@@ -12,8 +12,7 @@ Score MinimaxAgent::evaluate(const Board& board, int depth, int currentPlayer) c
     return board.evaluate(currentPlayer); 
 }
 
-Score MinimaxAgent::negamax(Board& board, int depth, int currentPlayer) const {
-    // Используем getGameState()
+Score MinimaxAgent::minimax(Board& board, int depth, int currentPlayer) const {
     if (board.getGameState() != GameState::Ongoing || depth >= maxDepth) {
         return evaluate(board, depth, currentPlayer);
     }
@@ -24,9 +23,14 @@ Score MinimaxAgent::negamax(Board& board, int depth, int currentPlayer) const {
     for (int i = 0; i < size * size; ++i) {
         if (board.getCell(i) == 0) {
             board.makeMove(i);
-            Score currentScore = -negamax(board, depth + 1, 3 - currentPlayer);
+            
+            Score currentScore = -minimax(board, depth + 1, 3 - currentPlayer);
+            
             board.undoMove(i);
-            if (currentScore > bestScore) bestScore = currentScore;
+            
+            if (currentScore > bestScore) {
+                bestScore = currentScore;
+            }
         }
     }
     return bestScore;
@@ -42,8 +46,11 @@ int MinimaxAgent::chooseMove(const Board& board) const {
     for (int i = 0; i < size * size; ++i) {
         if (copy.getCell(i) == 0) {
             copy.makeMove(i);
-            Score score = -negamax(copy, 0, 3 - player);
+            
+            Score score = -minimax(copy, 0, 3 - player);
+            
             copy.undoMove(i);
+            
             if (score > bestScore) {
                 bestScore = score;
                 bestMove = i;

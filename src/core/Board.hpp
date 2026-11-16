@@ -35,7 +35,7 @@ public:
     bool isWin(int player) const;
     bool isDraw() const;
     
-    GameState getGameState() const; // Заменяет isGameOver
+    GameState getGameState() const; // enum
     
     uint64_t getState() const;
     void print() const;
