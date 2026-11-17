@@ -27,14 +27,13 @@ MutableArraySequence<int> AlphaBetaAgent::getOrderedMoves(const Board& board) co
     MutableArraySequence<int> emptyCells;
     int boardSize = board.GetSize();
     
-    // Сами собираем пустые клетки
+    //собираем пустые клетки
     for (int i = 0; i < boardSize * boardSize; ++i) {
         if (board.getCell(i) == 0) {
             emptyCells.Append(i);
         }
     }
 
-    // Дальше идет твоя пузырьковая сортировка (или сортировка вставками)
     MutableArraySequence<int> sortedCells;
     int totalMoves = emptyCells.GetLength();
 
